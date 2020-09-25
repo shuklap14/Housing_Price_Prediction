@@ -1,0 +1,306 @@
+---
+title: "HousePrice"
+author: ""
+date: "2/18/2020"
+output: word_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars}
+library("readxl")
+dim(train)
+train <- read.csv("C:/Users/praga/Downloads/ChromDownloads/train.csv")
+View(train)
+colnames(train)=tolower(make.names(colnames(train)))
+attach(train)
+
+install.packages("DataExplorer")
+library("DataExplorer")
+```
+```{r}
+
+#Reducing the dataset to numeric variables only
+train.num=dplyr::select_if(train, is.numeric)
+DataExplorer::create_report(train.num)
+```
+
+
+
+
+
+```{r}
+summary(train)
+
+```
+
+```{r}
+summary(train)
+#To find the sum of NA in each column of dataframe.
+null.sum=colSums(is.na(train))
+Nulls=null.sum[which(null.sum>0)]
+Nulls
+```
+
+```{r}
+#Converting mssubclass from numeric to categorical feature
+train$mssubclass=as.factor(train$mssubclass)   
+
+```
+
+```{r}
+max(train$yearbuilt)
+```
+
+
+
+```{r}
+train$saleprice=log(train$saleprice)
+hist(train$saleprice)
+
+```
+
+```{r}
+
+#install.packages("corrplot")
+library(corrplot)
+cor.mat=cor(as.matrix(train.num[1:20],train.num$saleprice))
+corrplot(cor.mat, method="circle", type="upper")
+
+
+library(corrplot)
+cor.mat=cor(as.matrix(train.num[21:37],train.num$saleprice))
+corrplot(cor.mat, method="circle", type="upper")
+```
+
+```{r}
+##
+#"lotfrontage"  "masvnrtype"   "masvnrarea"   "bsmtcond"     "bsmtexposure" "bsmtfintype1"
+##[7] "bsmtfintype2" "electrical"   "fireplacequ"  "garagetype"   "garageyrblt"  "garagefinish"
+#[13] "garagequal"   "garagecond"   "poolqc"       "fence"        "miscfeature" 
+library(dplyr)
+library(magrittr)
+library(forcats)
+#use alley, fence and basement condition
+#is.na(train$poolarea)
+train%<>% mutate(alley = fct_explicit_na(f = train$alley, na_level = "None"))
+#train%<>% mutate(masvnrtype = fct_explicit_na(f = train$masvnrtype, na_level = "None"))
+train%<>% mutate(bsmtcond = fct_explicit_na(f = train$bsmtcond, na_level = "None"))
+#train%<>% mutate(bsmtexposure = fct_explicit_na(f = train$bsmtexposure, na_level = "None"))
+levels(train$fence)
+train%<>% mutate(fence = fct_explicit_na(f = train$fence, na_level = "None"))
+#train%<>% mutate(electrical = fct_explicit_na(f = train$electrical, na_level ="None"))
+train%<>% mutate(poolqc = fct_explicit_na(f = train$poolqc, na_level = "None"))
+#train%<>% mutate(miscfeature = fct_explicit_na(f = train$miscfeature, na_level = "None"))
+#train%<>% mutate(alley = fct_explicit_na(f = train$alley, na_level = "None"))
+#train%<>% mutate(alley = fct_explicit_na(f = train$alley, na_level = "None"))
+#train%<>% mutate(alley = fct_explicit_na(f = train$alley, na_level = "None"))
+#train%<>% mutate(alley = fct_explicit_na(f = train$alley, na_level = "None"))
+names(train.num)
+```
+
+```{r}
+lmout=lm(saleprice~ overallqual+ yearbuilt+totalbsmtsf+x1stflrsf+grlivarea+fullbath+totrmsabvgrd+fireplaces+garagecars+garagearea+wooddecksf+openporchsf+alley+poolqc+fence,data=train)
+summary(lmout)
+```
+```{r}
+confint(lmout)
+```
+
+
+
+```{r}
+lmout1=lm(saleprice~ overallqual+ yearbuilt+totalbsmtsf+x1stflrsf+grlivarea+fireplaces+garagecars+garagearea+wooddecksf+poolqc,data=train)
+summary(lmout1)
+```
+
+```{r}
+dim(train)
+lmout1=lm(saleprice~ overallqual+yearbuilt+totalbsmtsf+grlivarea+fireplaces+wooddecksf,data=train)
+summary(lmout1)
+dim(df.test)
+```
+```{r}
+plot(lmout1)
+```
+
+
+```{r}
+lmout2=lm(saleprice~ overallqual+x1stflrsf+fireplaces+garagecars+garagearea+wooddecksf+poolqc,data=train)
+summary(lmout2)
+plot(lmout2)
+```
+
+```{r}
+```
+
+
+```{r}
+lmout3=lm(saleprice~ overallqual+grlivarea+fireplaces+ poolqc   ,data=train)
+summary(lmout3)
+plot(lmout3)
+```
+```{r}
+lmout4=lm(saleprice~ overallqual+grlivarea+fireplaces,data=train)
+summary(lmout4)
+plot(lmout4)
+```
+
+```{r}
+lmout5=lm(saleprice~ overallqual+ fireplaces+wooddecksf +garagecars   ,data=train)
+summary(lmout5)
+plot(lmout5)
+```
+
+```{r}
+lmout6=lm(saleprice~ overallqual+ fireplaces+wooddecksf +garagearea+x1stflrsf,data=train)
+summary(lmout6)
+plot(lmout6)
+```
+
+```{r}
+confint(lmout6)
+```
+```{r}
+#LINE assumptions
+#Plot 1
+plot(train$saleprice,lmout1$fitted.values,pch=19)
+#1.Linearity:The plot (Plot 1) looks almost linear. Thus we can say that the model conforms to the assumptions of linearity.
+#Plot 2, has 4 plots
+par(mfrow=c(2,2))
+plot(lmout1)
+#2.Independence: Since this isn't a time series data, the independence doesn't come into picture.
+
+#3.Normality: The Normal QQ plot (2nd from Plot 2) shows that there is a pattern. At the mid values, the data points are conforming to the normality line. At the extremes, the data points are dispersed. The regression model is not violating the normality assumption too much.
+
+#4.Equality of variances/Homoscedasicity: The plot of Residuals vs Fitted values (1st and 3rd from plot2) show that as the fitted values along x increase, the residuals decrease and then increase a bit. This pattern is indicated by red line on the plot.This shows that the model conforms to the assumptions of Homoscedasticity of residuals.Almost equal variance below and above the horizontal line can be seen. 
+#Plot3
+plot.new()
+plot(rstandard(lmout1),pch=19) + abline(0,0,col="red",lwd=3)
+#This model does conform to Equality of variances to some extent. We can see from the plot (Plot 3) that we have data points above the linear line at the extreme left and a few below it.
+```
+
+```{r}
+train$allArea=train$grlivarea+train$garagearea+train$poolarea      
+train$areaFraction=train$allArea/train$lotarea
+any(is.na(train$yearDiff))
+train$yearDiff=train$yrsold - train$yearbuilt
+
+my.lm=lm(saleprice~overallqual+overallcond+mssubclass+areaFraction+neighborhood+mszoning+housestyle+log(yearbuilt)+heating+neighborhood+foundation+bsmtqual+kitchenqual,data=train)
+
+summary(my.lm)
+
+```
+
+```{r}
+my.lm1=lm(saleprice~overallqual+overallcond+mssubclass+areaFraction+neighborhood+mszoning+housestyle+yearbuilt+heating+neighborhood+foundation+bsmtqual+kitchenqual,data=train)
+
+summary(my.lm1)
+```
+
+
+
+```{r}
+rm(list=ls(df.test))
+rm(df.test)
+rm(submission)
+library("readxl")
+
+test <- read.csv("C:/Users/praga/Downloads/ChromDownloads/test.csv")
+#View(test)
+#colnames(test)=tolower(make.names(colnames(test)))
+#attach(test)
+```
+
+
+
+```{r}
+
+
+#Calculating error rates
+#install.packages("Metrics")
+library("Metrics")
+names(test)
+dim(test)
+
+df.test=subset(test, select=c("OverallQual","YearBuilt","TotalBsmtSF","GrLivArea","Fireplaces","WoodDeckSF","GarageArea"))
+dim(df.test)
+summary(df.test)
+#which(is.na(df.test))
+#which(is.na(df.test$GarageArea))
+attach(df.test)
+#which(is.na(df.test$TotalBsmtSF))
+#a=661
+#b=1117
+
+##df.test1=df.test$GarageArea[-1117]
+#df.test1=df.test[-b]
+#df.test1$
+#summary(df.test1)
+#df.test$GarageArea[1117] =mean(df.test1)
+#df.test[is.na(df.test$TotalBsmtSF)] =mean(df.test$TotalBsmtSF)
+#df.test[1117]
+#View(df.test)
+#pred1=predict.lm(lmout6,df.test)
+#pred$SalePrice=predict.lm(lmout1,df.test) 
+#pred
+#any(is.na(test$SalePrice))
+write.csv(pred$SalePrice,"C:/Users/praga/Downloads/ChromDownloads/predictions.csv",row.names = FALSE)
+
+
+# 
+submission=subset(test,select=c("Id","SalePrice"))
+summary(submission)
+which(is.na(submission$SalePrice))
+
+write.csv(submission,"C:/Users/praga/Downloads/ChromDownloads/submission.csv",row.names = FALSE)
+any(is.na(submission))
+any(is.na(df.test))
+
+#Model evaluation
+#RMSE <- function(error) { sqrt(mean(error^2)) }
+#RMSE(fit$residuals)
+#mse(df.test$saleprice,pred1)
+#rmse(df.test$saleprice,pred1)
+#Plotting Actual and Predicted values and straight line through it to 
+#plot(df.test$saleprice,pred1, xlab="Actual", ylab = "Predicted") +abline(0,1,col="red")
+
+```
+
+```{r}
+head(pred1)
+
+```
+
+```{r}
+names(train)
+
+#Histogram of Response variable
+#hist(train$)
+```
+
+
+```{r}
+```
+
+
+```{r}
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
